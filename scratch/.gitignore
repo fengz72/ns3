@@ -5,3 +5,8 @@
 !subdir/
 !scratch-simulator.cc
 !CMakeLists.txt
+
+!dra1/
+!dra2/
+!dra3/
+!sim/
