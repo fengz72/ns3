@@ -10,7 +10,6 @@
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/ipv4.h"
-#include "ns3/distributed-simulator-impl.h"
 #include "ns3/mpi-module.h"
 #include "ns3/mobility-module.h"
 
