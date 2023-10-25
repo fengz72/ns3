@@ -128,8 +128,8 @@ void flow_monitor(Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmon)
         Jitter += iter->second.jitterSum;
         j = j + 1;
 
-        Histogram delayHistogram = iter->second.delayHistogram;
-        delayHistogram.SerializeToXmlStream(std::cout, 1, " ");
+//        Histogram delayHistogram = iter->second.delayHistogram;
+//        delayHistogram.SerializeToXmlStream(std::cout, 1, " ");
     }
 
     NS_LOG_UNCOND("--------Total Results of the simulation----------");
@@ -137,11 +137,15 @@ void flow_monitor(Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmon)
     NS_LOG_UNCOND("Total sent packets  = " << SentPackets);
     NS_LOG_UNCOND("Total Received Packets = " << ReceivedPackets);
     NS_LOG_UNCOND("Total Lost Packets = " << LostPackets);
-    NS_LOG_UNCOND("Packet Loss ratio = " << ((LostPackets * 100) / SentPackets) << "%");
-    NS_LOG_UNCOND("Packet delivery ratio = " << (( ReceivedPackets * 100) / SentPackets) << "%");
+    if (SentPackets != 0) {
+        NS_LOG_UNCOND("Packet Loss ratio = " << ((LostPackets * 100) / SentPackets) << "%");
+        NS_LOG_UNCOND("Packet delivery ratio = " << (( ReceivedPackets * 100) / SentPackets) << "%");
+    }
     NS_LOG_UNCOND("Average Throughput = " << AvgThroughput<< "Kbps");
     NS_LOG_UNCOND("End to End Delay = " << Delay);
-    NS_LOG_UNCOND("Average Delay = " << Delay / ReceivedPackets);
+    if (ReceivedPackets != 0) {
+        NS_LOG_UNCOND("Average Delay = " << Delay / ReceivedPackets);
+    }
     NS_LOG_UNCOND("End to End Jitter delay = " << Jitter);
 }
 
@@ -168,8 +172,8 @@ void test(int argc, char *argv[])
     int total = orbits * sats;
 
     int UnavailableInterval = 4;
-    int HelloInterval = 1;
-    float CheckNeighborInterval = 0.5;
+//    int HelloInterval = 1;
+//    float CheckNeighborInterval = 0.5;
     string sendRate = "16kbps";
     uint16_t port = 9;
     uint32_t packetSize = 1024;
@@ -199,19 +203,19 @@ void test(int argc, char *argv[])
     // sat down
     squareError(nodes, len);
 
-    // 发送 hello 包
-    int N = stopTime/HelloInterval;
-    for(int i=0; i < N; i++){
-        Time onInterval = Seconds(i*HelloInterval);
-        Simulator::Schedule (onInterval, &SendHello);
-    }
-    // 检查邻居状态
-    N = (int)(stopTime/CheckNeighborInterval);
-    for(int i=0; i< N; i++){
-        Time onInterval = Seconds(i*CheckNeighborInterval);
-        Simulator::Schedule (onInterval, &CheckNeighbor);
-    }
-
+//    // 发送 hello 包
+//    int N = stopTime/HelloInterval;
+//    for(int i=0; i < N; i++){
+//        Time onInterval = Seconds(i*HelloInterval);
+//        Simulator::Schedule (onInterval, &SendHello);
+//    }
+//    // 检查邻居状态
+//    N = (int)(stopTime/CheckNeighborInterval);
+//    for(int i=0; i< N; i++){
+//        Time onInterval = Seconds(i*CheckNeighborInterval);
+//        Simulator::Schedule (onInterval, &CheckNeighbor);
+//    }
+    Simulator::Schedule (Seconds(0.1), &SendHello);
 
     // flow-monitor
     FlowMonitorHelper flowmon;
