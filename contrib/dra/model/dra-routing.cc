@@ -4,7 +4,7 @@
 
 #include "dra-routing.h"
 
-#include "conf-loader.h"
+#include "dra-config.h"
 #include "dra-tag.h"
 
 #include "ns3/core-module.h"

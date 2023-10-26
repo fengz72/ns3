@@ -13,16 +13,16 @@ endif()
 build_lib(
     LIBNAME dra
     SOURCE_FILES model/dra-routing.cc
-                 model/conf-loader.cc
+                 model/dra-config.cc
                  model/dra-table-entry.cc
                  model/dra-tag.cc
-                 model/utils.cc
+        model/dra-utils.cc
                  helper/dra-routing-helper.cc
     HEADER_FILES model/dra-routing.h
-                 model/conf-loader.h
+                 model/dra-config.h
                  model/dra-table-entry.h
                  model/dra-tag.h
-                 model/utils.h
+        model/dra-utils.h
                  helper/dra-routing-helper.h
     LIBRARIES_TO_LINK
         ${libcore}

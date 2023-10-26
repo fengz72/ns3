@@ -11,7 +11,9 @@
 
 using namespace std;
 namespace ns3 {
-class DrlfUtils {
+
+class DraUtils
+{
   public:
     static void topo(NodeContainer &nodes, int P, int n, Ipv4RoutingHelper &routingHelper);
 
@@ -19,14 +21,13 @@ class DrlfUtils {
 
     static void randomLinkError(NodeContainer& nodes, uint32_t limit);
 
-    static void squareError(NodeContainer& nodes, uint32_t limit);
+    static void squareError(uint32_t limit);
     static void satBreak(uint16_t id);
 
     static void AssignIp(Ptr<Node> node, pair<uint16_t , uint16_t> nodePair, int type);
 
     static void LinkSatAndGs(Ptr<Node> sat, Ptr<Node> gs, pair<uint16_t , uint16_t> satPair);
 };
-
 
 }
 

@@ -10,6 +10,9 @@
 
 #include "ns3/flow-monitor-module.h"
 
+#include "ns3/dra-module.h"
+#include "ns3/dra-utils.h"
+
 using namespace ns3;
 using namespace std;
 
@@ -265,7 +268,7 @@ int main(int argc, char *argv[])
     //    LogComponentEnable("DrlfRouting", LOG_LEVEL_LOGIC);
 
     NS_LOG_INFO("ttl = " << ttl << ", error = " << error);
-    float stopTime = 5;
+    float stopTime = 90 * 60;
     float lsa_startTime = 0.05; // 50ms后开始发送
     float dij_startTime = 0.5; // 500ms时计算dijkstra
     uint16_t orbits = 72;
@@ -292,24 +295,24 @@ int main(int argc, char *argv[])
     // 建立拓扑
     NS_LOG_LOGIC("建立拓扑");
     DrlfRoutingHelper drlfRoutingHelper;
-    topo(nodes, orbits, sats, drlfRoutingHelper);
+    DrlfUtils::topo(nodes, orbits, sats, drlfRoutingHelper);
     // 安装移动模型
     NS_LOG_LOGIC("安装移动模型");
-    mobility_1584(nodes);
+    DrlfUtils::mobility_1584(nodes);
     // 地面站
-    NodeContainer gss;
-    SetGs(gss);
-    pair<uint16_t, uint32_t> satPair1(10, 20);
-    pair<uint16_t, uint32_t> satPair2(52, 21);
-    LinkSatAndGs(nodes.Get(DrlfConfig::Instance()->GetSatId(satPair1)), gss.Get(0), satPair1);
-    LinkSatAndGs(nodes.Get(DrlfConfig::Instance()->GetSatId(satPair2)), gss.Get(1), satPair2);
+//    NodeContainer gss;
+//    SetGs(gss);
+//    pair<uint16_t, uint32_t> satPair1(10, 20);
+//    pair<uint16_t, uint32_t> satPair2(52, 21);
+//    DrlfUtils::LinkSatAndGs(nodes.Get(DrlfConfig::Instance()->GetSatId(satPair1)), gss.Get(0), satPair1);
+//    DrlfUtils::LinkSatAndGs(nodes.Get(DrlfConfig::Instance()->GetSatId(satPair2)), gss.Get(1), satPair2);
     // 安装 client 和 server
     NS_LOG_LOGIC("安装 client 和 server");
     SetAllServer(port, stopTime);
     SetRandomClient(nodes, stopTime, port, sendRate, packetSize);
 
     // interface down
-    randomLinkError(nodes, error);
+    DrlfUtils::randomLinkError(nodes, error);
 
     //    // 发送 hello 包
     //    int N = stopTime/HelloInterval;

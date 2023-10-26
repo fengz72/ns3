@@ -41,6 +41,7 @@ class DrlfTable
 {
   public:
     DrlfTable();
+    ~DrlfTable();
 
     void AddEntry(uint16_t id, int oif, double cost);
     void DeleteEntry(uint16_t id);

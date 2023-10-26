@@ -58,14 +58,11 @@ void SetAllServer(int port, float stop)
 void
 SetSatClient(int source, int dest, int port, string rate, int size, float start, float stop)
 {
-    NS_LOG_FUNCTION("Create Applications " << source << dest << port << rate << size << start << stop);
+    NS_LOG_FUNCTION("Create Applications" << source << dest << port << rate << size << start << stop);
+    Ptr<Node> node = DRAConfLoader::Instance()->getNodeContainer().Get(dest);
+    Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
     OnOffHelper onOffHelper("ns3::UdpSocketFactory",
-                            Address(InetSocketAddress(DRAConfLoader::Instance()
-                                                          ->getNodeContainer()
-                                                          .Get(dest)
-                                                          ->GetObject<Ipv4>()
-                                                          ->GetAddress(1, 0)
-                                                          .GetLocal(),
+                            Address(InetSocketAddress(ipv4->GetAddress(1, 0).GetLocal(),
                                                       port)));
     onOffHelper.SetConstantRate(DataRate(rate), size);
     ApplicationContainer apps = onOffHelper.Install(DRAConfLoader::Instance()->getNodeContainer().Get(source));
@@ -88,7 +85,7 @@ SetGsClient(Ptr<Node> source, Ptr<Node> dest, int destIndex, int port, string ra
     apps.Stop(Seconds(stop));
 }
 
-void SetRandomClient(NodeContainer nodes, uint32_t stopTime, int port, string rate, int size)
+void SetRandomClient(NodeContainer &nodes, uint32_t stopTime, int port, string rate, int size)
 {
     uint32_t min = 0;
     uint32_t max = nodes.GetN() - 1;
@@ -177,8 +174,8 @@ void test(int argc, char *argv[])
     int total = orbits * sats;
 
     int UnavailableInterval = 4;
-    int HelloInterval = 1;
-    float CheckNeighborInterval = 0.5;
+//    int HelloInterval = 1;
+//    float CheckNeighborInterval = 0.5;
     string sendRate = "16kbps";
     uint16_t port = 9;
     uint32_t packetSize = 1024;
@@ -195,10 +192,10 @@ void test(int argc, char *argv[])
     // 建立拓扑
     NS_LOG_LOGIC("建立拓扑");
     DRARoutingHelper draRoutingHelper;
-    topo(nodes, orbits, sats, draRoutingHelper);
+    DraUtils::topo(nodes, orbits, sats, draRoutingHelper);
     // 安装移动模型
     NS_LOG_LOGIC("安装移动模型");
-    mobility_1584(nodes);
+    DraUtils::mobility_1584(nodes);
     // 安装 client 和 server
     NS_LOG_LOGIC("安装 client 和 server");
     SetAllServer(port, stopTime);
@@ -206,21 +203,21 @@ void test(int argc, char *argv[])
     SetRandomClient(nodes, stopTime, port, sendRate, packetSize);
 
     // interface down
-    randomLinkError(nodes, linkError);
+    DraUtils::randomLinkError(nodes, linkError);
 
-    // 发送 hello 包
-    int N = stopTime/HelloInterval;
-    for(int i=0; i < N; i++){
-        Time onInterval = Seconds(i*HelloInterval);
-        Simulator::Schedule (onInterval, &SendHello);
-    }
-    // 检查邻居状态
-    N = (int)(stopTime/CheckNeighborInterval);
-    for(int i=0; i< N; i++){
-        Time onInterval = Seconds(i*CheckNeighborInterval);
-        Simulator::Schedule (onInterval, &CheckNeighbor);
-    }
-
+//    // 发送 hello 包
+//    int N = stopTime/HelloInterval;
+//    for(int i=0; i < N; i++){
+//        Time onInterval = Seconds(i*HelloInterval);
+//        Simulator::Schedule (onInterval, &SendHello);
+//    }
+//    // 检查邻居状态
+//    N = (int)(stopTime/CheckNeighborInterval);
+//    for(int i=0; i< N; i++){
+//        Time onInterval = Seconds(i*CheckNeighborInterval);
+//        Simulator::Schedule (onInterval, &CheckNeighbor);
+//    }
+    Simulator::Schedule (Seconds(0.1), &SendHello);
 
     // flow-monitor
     FlowMonitorHelper flowmon;

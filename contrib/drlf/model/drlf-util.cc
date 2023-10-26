@@ -4,7 +4,6 @@
 
 #include "drlf-util.h"
 
-#include "ns3/conf-loader.h"
 #include "ns3/core-module.h"
 #include "ns3/drlf-routing.h"
 #include "ns3/mobility-module.h"
@@ -18,12 +17,8 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DrlfUtil");
 
-std::string epoch_g("2023-09-01 00:00:00");
-std::string path_100 = "./scratch/sim/res/test-1.txt";
-std::string path_1584 = "./scratch/sim/res/starlink-1.txt";
-
 void
-topo(NodeContainer &nodes, int P, int n, Ipv4RoutingHelper &routingHelper)
+DrlfUtils::topo(NodeContainer &nodes, int P, int n, Ipv4RoutingHelper &routingHelper)
 {
     NS_LOG_FUNCTION("开始建立网络拓扑");
 
@@ -76,7 +71,7 @@ topo(NodeContainer &nodes, int P, int n, Ipv4RoutingHelper &routingHelper)
         std::string mask = "255.255.255.0";
         ipv4.SetBase(ip.c_str(), mask.c_str());
 
-        Ipv4InterfaceContainer ipv4InterfaceContainer = ipv4.Assign(netDeviceContainer);
+        ipv4.Assign(netDeviceContainer);
     }
 
     // 连接同轨道前后
@@ -126,53 +121,13 @@ topo(NodeContainer &nodes, int P, int n, Ipv4RoutingHelper &routingHelper)
 }
 
 void
-mobility_100(NodeContainer& nodes)
+DrlfUtils::mobility_1584(NodeContainer& nodes)
 {
     NS_LOG_FUNCTION("安装移动模型");
+    string epoch_g = "2023-09-01 00:00:00";
     JulianDate time(epoch_g);
 
-    std::ifstream file(path_100);
-    if (!file.is_open()) {
-        NS_LOG_ERROR("tle文件打开失败");
-        std::exit(EXIT_FAILURE);
-    }
-
-    uint32_t count = 0;
-    while (file.peek() != std::char_traits<char>::eof() && count < nodes.GetN()) {
-        NS_LOG_LOGIC("正在安装第" << count << "个节点");
-        std::string name;
-        std::string line1;
-        std::string line2;
-        std::getline(file, name);
-        std::getline(file, line1);
-        std::getline(file, line2);
-        // 根据tle创建卫星
-        Ptr<Satellite> sat = CreateObject<Satellite>();
-        sat->SetName(name);
-        sat->SetTleInfo(line1, line2);
-        // 创建移动模型
-        Ptr<SatellitePositionMobilityModel> satModel = CreateObject<SatellitePositionMobilityModel>();
-        satModel->SetStartTime(time);
-        satModel->SetSatellite(sat);
-        // 将移动模型聚合到节点上
-        Ptr<Node> node = nodes.Get(count);
-        Ptr<MobilityModel> model = node->GetObject<MobilityModel>();
-        if (! model) {
-            model = DynamicCast<MobilityModel>(satModel);
-            node -> AggregateObject(model);
-        }
-
-        count++;
-    }
-    NS_LOG_LOGIC("移动模型安装完成");
-}
-
-void
-mobility_1584(NodeContainer& nodes)
-{
-    NS_LOG_FUNCTION("安装移动模型");
-    JulianDate time(epoch_g);
-
+    string path_1584 = "./scratch/sim/res/starlink-1.txt";
     std::ifstream file(path_1584);
     if (!file.is_open()) {
         NS_LOG_ERROR("tle文件打开失败");
@@ -210,7 +165,7 @@ mobility_1584(NodeContainer& nodes)
 }
 
 void
-randomLinkError(NodeContainer& nodes, uint32_t limit)
+DrlfUtils::randomLinkError(NodeContainer& nodes, uint32_t limit)
 {
     NS_LOG_FUNCTION("randomLinkError");
     uint32_t min = 1;
@@ -236,7 +191,8 @@ randomLinkError(NodeContainer& nodes, uint32_t limit)
     NS_LOG_INFO("total down interface: " << count);
 }
 
-void squareError(NodeContainer& nodes, uint32_t limit)
+void
+DrlfUtils::squareError(NodeContainer& nodes, uint32_t limit)
 {
     NS_LOG_FUNCTION(limit);
 
@@ -262,8 +218,10 @@ void squareError(NodeContainer& nodes, uint32_t limit)
     }
 }
 
-void satBreak(uint16_t id)
+void
+DrlfUtils::satBreak(uint16_t id)
 {
+    NS_LOG_FUNCTION(id);
     Ptr<Node> node = DrlfConfig::Instance()->GetNodeContainer().Get(id);
     Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
 
@@ -275,7 +233,8 @@ void satBreak(uint16_t id)
 }
 
 
-void AssignIp(Ptr<Node> node, pair<uint16_t , uint16_t> nodePair, int type)
+void
+DrlfUtils::AssignIp(Ptr<Node> node, pair<uint16_t , uint16_t> nodePair, int type)
 {
     uint32_t num = node->GetNDevices() - 1;
     uint32_t ip = (type << 24) | (nodePair.first << 16) | (nodePair.second << 8) | num;
@@ -320,7 +279,8 @@ void AssignIp(Ptr<Node> node, pair<uint16_t , uint16_t> nodePair, int type)
     }
 }
 
-void LinkSatAndGs(Ptr<Node> sat, Ptr<Node> gs, pair<uint16_t , uint16_t> satPair) {
+void
+DrlfUtils::LinkSatAndGs(Ptr<Node> sat, Ptr<Node> gs, pair<uint16_t , uint16_t> satPair) {
     ObjectFactory m_queueFactory;   //!< Queue Factory
     ObjectFactory m_deviceFactory;  //!< Device Factory
     ObjectFactory m_channelFactory; // channel factory
@@ -346,7 +306,7 @@ void LinkSatAndGs(Ptr<Node> sat, Ptr<Node> gs, pair<uint16_t , uint16_t> satPair
     dev->AggregateObject(ndqiA);
     satDeviceContainer.Add(dev);
     // 分配ip
-    AssignIp(sat, satPair, SatelliteNode);
+    AssignIp(sat, satPair, DrlfConfig::SatelliteNode);
 
     // 地面站
     NetDeviceContainer gsDeviceContainer;
@@ -363,7 +323,7 @@ void LinkSatAndGs(Ptr<Node> sat, Ptr<Node> gs, pair<uint16_t , uint16_t> satPair
     dev->AggregateObject(ndqiA);
     gsDeviceContainer.Add(dev);
     // 分配ip
-    AssignIp(gs, satPair, GsNode);
+    AssignIp(gs, satPair, DrlfConfig::GsNode);
 
     // 连接
     Ptr<PointToPointNetDevice> devA = DynamicCast<PointToPointNetDevice>(satDeviceContainer.Get(0));

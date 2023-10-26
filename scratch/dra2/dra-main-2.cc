@@ -54,14 +54,11 @@ void SetAllServer(int port, float stop)
 void
 SetSatClient(int source, int dest, int port, string rate, int size, float start, float stop)
 {
-    NS_LOG_FUNCTION("Create Applications " << source << dest << port << rate << size << start << stop);
+    NS_LOG_FUNCTION("Create Applications" << source << dest << port << rate << size << start << stop);
+    Ptr<Node> node = DRAConfLoader::Instance()->getNodeContainer().Get(dest);
+    Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
     OnOffHelper onOffHelper("ns3::UdpSocketFactory",
-                            Address(InetSocketAddress(DRAConfLoader::Instance()
-                                                          ->getNodeContainer()
-                                                          .Get(dest)
-                                                          ->GetObject<Ipv4>()
-                                                          ->GetAddress(1, 0)
-                                                          .GetLocal(),
+                            Address(InetSocketAddress(ipv4->GetAddress(1, 0).GetLocal(),
                                                       port)));
     onOffHelper.SetConstantRate(DataRate(rate), size);
     ApplicationContainer apps = onOffHelper.Install(DRAConfLoader::Instance()->getNodeContainer().Get(source));
@@ -84,7 +81,7 @@ SetGsClient(Ptr<Node> source, Ptr<Node> dest, int destIndex, int port, string ra
     apps.Stop(Seconds(stop));
 }
 
-void SetRandomClient(NodeContainer nodes, uint32_t stopTime, int port, string rate, int size)
+void SetRandomClient(NodeContainer &nodes, uint32_t stopTime, int port, string rate, int size)
 {
     uint32_t min = 0;
     uint32_t max = nodes.GetN() - 1;
@@ -151,9 +148,7 @@ void flow_monitor(Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmon)
 
 void test(int argc, char *argv[])
 {
-    std::cout << "test start!" << endl;
-
-    uint32_t len = 0;
+    uint32_t len = 5;
     CommandLine cmd(__FILE__);
     cmd.AddValue("len", "方框大小: ", len);
     cmd.Parse(argc, argv);
@@ -190,10 +185,10 @@ void test(int argc, char *argv[])
     // 建立拓扑
     NS_LOG_LOGIC("建立拓扑");
     DRARoutingHelper draRoutingHelper;
-    topo(nodes, orbits, sats, draRoutingHelper);
+    DraUtils::topo(nodes, orbits, sats, draRoutingHelper);
     // 安装移动模型
     NS_LOG_LOGIC("安装移动模型");
-    mobility_1584(nodes);
+    DraUtils::mobility_1584(nodes);
     // 安装 client 和 server
     NS_LOG_LOGIC("安装 client 和 server");
     SetAllServer(port, stopTime);
@@ -201,7 +196,7 @@ void test(int argc, char *argv[])
     SetRandomClient(nodes, stopTime, port, sendRate, packetSize);
 
     // sat down
-    squareError(nodes, len);
+    DraUtils::squareError(len);
 
 //    // 发送 hello 包
 //    int N = stopTime/HelloInterval;

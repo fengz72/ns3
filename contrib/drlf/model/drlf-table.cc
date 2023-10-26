@@ -157,4 +157,8 @@ DrlfTable::CalcNextHop(uint16_t destId)
     return entry;
 }
 
+DrlfTable::~DrlfTable()
+{
+}
+
 } // namespace ns3

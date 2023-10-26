@@ -173,7 +173,7 @@ void flow_monitor(Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmon)
     Time Jitter;
     Time Delay;
 
-    Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier ());
+//    Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier ());
     std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
     for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = stats.begin (); iter != stats.end (); ++iter)
@@ -197,11 +197,15 @@ void flow_monitor(Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmon)
     NS_LOG_UNCOND("Total sent packets  = " << SentPackets);
     NS_LOG_UNCOND("Total Received Packets = " << ReceivedPackets);
     NS_LOG_UNCOND("Total Lost Packets = " << LostPackets);
-    NS_LOG_UNCOND("Packet Loss ratio = " << ((LostPackets * 100) / SentPackets) << "%");
-    NS_LOG_UNCOND("Packet delivery ratio = " << (( ReceivedPackets * 100) / SentPackets) << "%");
+    if (SentPackets != 0) {
+        NS_LOG_UNCOND("Packet Loss ratio = " << ((LostPackets * 100) / SentPackets) << "%");
+        NS_LOG_UNCOND("Packet delivery ratio = " << (( ReceivedPackets * 100) / SentPackets) << "%");
+    }
     NS_LOG_UNCOND("Average Throughput = " << AvgThroughput<< "Kbps");
     NS_LOG_UNCOND("End to End Delay = " << Delay);
-    NS_LOG_UNCOND("Average Delay = " << Delay / ReceivedPackets);
+    if (ReceivedPackets != 0) {
+        NS_LOG_UNCOND("Average Delay = " << Delay / ReceivedPackets);
+    }
     NS_LOG_UNCOND("End to End Jitter delay = " << Jitter);
 }
 
@@ -276,17 +280,17 @@ void test(int argc, char *argv[])
     // 建立拓扑
     NS_LOG_LOGIC("建立拓扑");
     DRARoutingHelper draRoutingHelper;
-    topo(nodes, orbits, sats, draRoutingHelper);
+    DraUtils::topo(nodes, orbits, sats, draRoutingHelper);
     // 安装移动模型
     NS_LOG_LOGIC("安装移动模型");
-    mobility_1584(nodes);
+    DraUtils::mobility_1584(nodes);
     // 地面站
     NodeContainer gss;
     SetGs(gss);
     pair<uint16_t, uint32_t> satPair1(10, 20);
     pair<uint16_t, uint32_t> satPair2(52, 21);
-    LinkSatAndGs(nodes.Get(DRAConfLoader::Instance()->GetSatId(satPair1)), gss.Get(0), satPair1);
-    LinkSatAndGs(nodes.Get(DRAConfLoader::Instance()->GetSatId(satPair2)), gss.Get(1), satPair2);
+    DraUtils::LinkSatAndGs(nodes.Get(DRAConfLoader::Instance()->GetSatId(satPair1)), gss.Get(0), satPair1);
+    DraUtils::LinkSatAndGs(nodes.Get(DRAConfLoader::Instance()->GetSatId(satPair2)), gss.Get(1), satPair2);
     // 安装 client 和 server
     NS_LOG_LOGIC("安装 client 和 server");
     SetServer(gss.Get(1), port, stopTime);
