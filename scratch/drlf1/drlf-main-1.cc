@@ -264,8 +264,8 @@ int main(int argc, char *argv[])
     //    LogComponentEnable ("Simulator", LOG_LEVEL_LOGIC);
 
     //    LogComponentEnable ("DrlfMain1", LOG_LEVEL_LOGIC);
-    //    LogComponentEnable ("DrlfUtil", LOG_LEVEL_FUNCTION);
-    //    LogComponentEnable("DrlfRouting", LOG_LEVEL_LOGIC);
+//        LogComponentEnable ("DrlfUtil", LOG_LEVEL_LOGIC);
+//        LogComponentEnable("DrlfRouting", LOG_LEVEL_LOGIC);
 
     NS_LOG_INFO("ttl = " << ttl << ", error = " << error);
     float stopTime = 90 * 60;
@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
     //        Simulator::Schedule (onInterval, &CheckNeighbor);
     //    }
     // 发送hello, lsa
-    Simulator::Schedule (Seconds(0.0), &Hello);
+    Simulator::Schedule (Seconds(0.001), &Hello);
     Simulator::Schedule(Seconds(lsa_startTime), &LSA);
     // dijkstra
     Simulator::Schedule(Seconds(dij_startTime), &Dijkstra);

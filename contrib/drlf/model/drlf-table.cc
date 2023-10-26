@@ -123,6 +123,9 @@ DrlfTable::GetEntry(uint16_t destId)
 Ptr<DrlfTableEntry>
 DrlfTable::CalcNextHop(uint16_t destId)
 {
+    uint16_t P = DrlfConfig::Instance()->m_P;
+    uint16_t S = DrlfConfig::Instance()->m_S;
+
     std::pair<uint16_t, uint16_t > destPair = DrlfConfig::Instance()->GetSatPair(destId);
     uint16_t minId = 0;
     uint16_t minDelta = 1 << 15;
@@ -131,7 +134,15 @@ DrlfTable::CalcNextHop(uint16_t destId)
     for (auto it: m_table)
     {
         std::pair<uint16_t, uint16_t > cur = DrlfConfig::Instance()->GetSatPair(it.first);
-        uint16_t delta = abs((int)destPair.first - cur.first) + abs((int)destPair.first - cur.first);
+
+        int d_down = (S + destPair.second - cur.second) % S; // 向下的距离
+        int d_up = S - d_down; // 向上的距离
+        int d_y = min(d_down, d_up); // y方向上的最小距离
+        int d_right = (P + destPair.first - cur.first) % P; // 向右的距离
+        int d_left = P - d_right; // 向左的距离
+        int d_x = min(d_left, d_right); // x方向上的最小距离
+
+        int delta = d_y + d_x;
 
         if (delta < minDelta) {
             flag = true;

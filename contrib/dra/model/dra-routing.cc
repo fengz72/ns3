@@ -260,12 +260,12 @@ DRARouting::calcOif(std::pair<uint16_t, uint16_t> source,
     uint16_t orbits = DRAConfLoader::Instance()->getOrbits();
     uint16_t sats = DRAConfLoader::Instance()->getSats();
 
-    int d_down = (dest.second - source.second + sats) % sats; // 向下的距离
+    int d_down = (sats + dest.second - source.second) % sats; // 向下的距离
     int d_up = sats - d_down; // 向上的距离
     int d_y = min(d_down, d_up); // y方向上的最小距离
     int oif_y = (d_up <= d_down)? Up: Down; // 选择y方向上的哪个端口
 
-    int d_right = (dest.first - source.first + orbits) % orbits; // 向右的距离
+    int d_right = (orbits + dest.first - source.first) % orbits; // 向右的距离
     int d_left = orbits - d_right; // 向左的距离
     int d_x = min(d_left, d_right); // x方向上的最小距离
     int oif_x = (d_left <= d_right)? Left: Right; // 选择x方向上的哪个端口
